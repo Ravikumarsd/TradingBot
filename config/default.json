@@ -1,0 +1,15 @@
+{
+    "app": {
+        "port": "3000"
+    },
+    "dbConfig": {
+        "host": "localhost",
+        "port": "4000",
+        "dbName": "binance-trading",
+        "url": "mongodb+srv://new-user_1:R@v!cooldude77@binance-trading-cluster.oj6bo.mongodb.net/binance-trading?retryWrites=true&w=majority"
+    },
+    "taapi": {
+        "HOST_BULK": "https://api.taapi.io/bulk",
+        "SECRET": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6InNpZGRlc2g5NzZAZ21haWwuY29tIiwiaWF0IjoxNjE3MzY5MTA0LCJleHAiOjc5MjQ1NjkxMDR9.v-y2jij-f5eviHQw8vstTWpKDuggeBSbQIyPq_mE8PE"
+    }
+}
