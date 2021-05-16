@@ -3,7 +3,7 @@ const config = require("config")
 
 
 const db = require("./config/database");
-const MFI_SAR_HEIKINASHI = require("./Strategies/mfi_sar_heikinashi");
+const MFI_SAR_HEIKINASHI = require("./strategies/mfisarheikinashi");
 
 const port = config.get("app").port
 const app = express();
