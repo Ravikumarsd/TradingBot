@@ -6,7 +6,7 @@
         "host": "localhost",
         "port": "4000",
         "dbName": "binance-trading",
-        "url": "mongodb+srv://new-user_1:R@v!cooldude77@binance-trading-cluster.oj6bo.mongodb.net/binance-trading?retryWrites=true&w=majority"
+        
     },
     "taapi": {
         "HOST_BULK": "https://api.taapi.io/bulk",
