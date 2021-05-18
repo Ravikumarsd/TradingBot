@@ -17,7 +17,6 @@ Portfolios.findDocument = async (account) => await Portfolio.findOne({ accountNa
 
 Portfolios.updateDocument = async (account, amount) => {
     // console.log("Portfolios.updateDocument ===>", account,amount)
-
     const newPortfolio = await Portfolio.findOneAndUpdate({ accountName: account }, { $set: { amount } }, { new: true });
     console.log("newPortfolio ===>", newPortfolio)
 }

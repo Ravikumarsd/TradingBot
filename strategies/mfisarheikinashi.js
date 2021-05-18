@@ -3,6 +3,7 @@ var axios = require('axios');
 const colors = require('colors');
 const Trades = require("../trades/trades.dao");
 const Portfolios = require("../portfolio/portfolio.dao");
+const BinanceFutures = require("../binance/binance.futures");
 const { SECRET, HOST_BULK } = config.get("taapi")
 const MFI_SAR_HEIKINASHI = {}
 
@@ -21,9 +22,9 @@ MFI_SAR_HEIKINASHI.getMultipleIndicators = (symbol) => {
         const sar = +indicators.find((indicator) => indicator.id.includes("sar")).result.value.toFixed(8)
         const candleOpen = +indicators.find((indicator) => indicator.id.includes("candle")).result.open.toFixed(8)
 
-        // const mfi= 22.66605291
-        // const sar= 47714.76823078
-        // const candleOpen= 48572.98988915
+        // mfi = 74.6292439
+        // sar = 42214.00114753
+        // candleOpen = 45154.13696426
 
         console.log(colors.green.bold("symbol:", symbol))
         console.log(colors.yellow("mfi:", mfi))
@@ -52,7 +53,8 @@ MFI_SAR_HEIKINASHI.getMultipleIndicators = (symbol) => {
 
 MFI_SAR_HEIKINASHI.isPositionOpen = async () => {
     try {
-        const openedPositons = await Trades.findDocument();
+        const query = { status: "open" }
+        const openedPositons = await Trades.findDocument(query);
         // console.log("openedPositons   ===>", openedPositons)
         const noOfOpenTrades = openedPositons && openedPositons.length;
         const status = noOfOpenTrades == 1 && openedPositons && openedPositons[0] && openedPositons[0].status;
@@ -81,25 +83,50 @@ MFI_SAR_HEIKINASHI.getTradePosition = (mfi, sar, candleOpen) => {
     }
 }
 
-MFI_SAR_HEIKINASHI.closePosition = (openedPosition, mfi, sar, candleOpen) => {
+MFI_SAR_HEIKINASHI.closePosition = async (openedPosition, mfi, sar, candleOpen) => {
     const tradePostion = openedPosition.position
-    if (tradePostion == "long" && candleOpen < sar) {
-        Trades.updateDocument(openedPosition, mfi, sar, candleOpen)
-    } else if (tradePostion == "short" && candleOpen > sar) {
-        Trades.updateDocument(openedPosition, mfi, sar, candleOpen)
+    const cond = tradePostion == "long" && candleOpen < sar || tradePostion == "short" && candleOpen > sar
+    if (cond) {
+        const closePositionResp = await BinanceFutures.closePositon(openedPosition)
+        Trades.updateDocument(openedPosition, mfi, sar, candleOpen, closePositionResp)
     } else {
         console.log(colors.blue.bold(`Waiting to close ${tradePostion} position....`))
     }
 }
 
-MFI_SAR_HEIKINASHI.openLongPosition = (symbol) => {
-    console.log(colors.green.bold("opening Long position"))
+MFI_SAR_HEIKINASHI.openLongPosition = async (symbol, candleOpen, tradeInfo) => {
+    const position = tradeInfo.position
+    console.log(colors.green.bold(`opening ${position} ${symbol} position at price ${candleOpen}`))
+    const marketBuyResp = await BinanceFutures.marketBuy(symbol, candleOpen)
+    tradeInfo.quantity = +marketBuyResp.origQty
+    tradeInfo.side = marketBuyResp.side
+    tradeInfo.binanceStatusList = { ...marketBuyResp }
+    console.log("tradeInfo before insert ===>>", tradeInfo)
+    Trades.createDocument(tradeInfo).then((resp) => {
+        if (resp) {
+            console.log(`${position} trade inserted ==>`, resp)
+        }
+    }).catch((err) => {
+        console.log(colors.red.bold(err))
+    })
     //open long position in binance
-
 }
 
-MFI_SAR_HEIKINASHI.openShortPositoin = (symbol) => {
-    console.log(colors.red.bold("opening SHORT position"))
+MFI_SAR_HEIKINASHI.openShortPositoin = async (symbol, candleOpen, tradeInfo) => {
+    const position = tradeInfo.position
+    console.log(colors.green.bold(`opening ${position} ${symbol} position at price ${candleOpen}`))
+    const marketSelllResp = await BinanceFutures.marketSell(symbol, candleOpen)
+    tradeInfo.quantity = +marketSelllResp.origQty
+    tradeInfo.side = marketSelllResp.side
+    tradeInfo.binanceStatusList = {...marketSelllResp}
+    console.log("tradeInfo before insert ===>>", tradeInfo)
+    Trades.createDocument(tradeInfo).then((resp) => {
+        if (resp) {
+            console.log(`${position} trade inserted ==>`, resp)
+        }
+    }).catch((err) => {
+        console.log(colors.red.bold(err))
+    })
     //open short position in binance
 
 }
@@ -121,17 +148,13 @@ MFI_SAR_HEIKINASHI.openPosition = (symbol, mfi, sar, candleOpen) => {
             }
             const portfolio = await Portfolios.findDocument("MFI_SAR_HEIKINASHI")
             tradeInfo.portfolio = portfolio.amount
-            Trades.createDocument(tradeInfo).then((resp) => {
-                if (resp) {
-                    if (tradePostion == "long") {
-                        MFI_SAR_HEIKINASHI.openLongPosition()
-                    } else if (tradePostion == "short") {
-                        MFI_SAR_HEIKINASHI.openShortPositoin()
-                    }
-                }
-            }).catch((err) => {
-                console.log(colors.red.bold(err))
-            })
+
+            if (tradePostion == "long") {
+                MFI_SAR_HEIKINASHI.openLongPosition(symbol, candleOpen, tradeInfo)
+            } else if (tradePostion == "short") {
+                MFI_SAR_HEIKINASHI.openShortPositoin(symbol, candleOpen, tradeInfo)
+            }
+
         } else {
             console.error(colors.red.bold("No trade singal at this moment"))
         }

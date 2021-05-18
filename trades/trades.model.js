@@ -7,8 +7,11 @@ const tradeSchema = mongoose.Schema({
     "price": Number,
     "pnl": { amount: Number, percent: Number },
     "portfolio": Number,
+    "quantity": Number,
+    "side": String,
     "createdDate": { type: Date, default: Date.now },
     "updatedDate": { type: Date },
+
     "statusList": [{
         "symbol": String,
         "position": String,
@@ -19,8 +22,12 @@ const tradeSchema = mongoose.Schema({
         "mfi": Number,
         "sar": Number,
         "candleOpen": Number,
+        "quantity": Number,
+        "side": String,
         "createdDate": { type: Date, default: Date.now },
-    }]
+    }],
+    "binanceStatusList": [{}]
+
 });
 
 const Trade = mongoose.model('Trade', tradeSchema);

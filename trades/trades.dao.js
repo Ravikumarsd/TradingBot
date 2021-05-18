@@ -6,19 +6,24 @@ const Portfolios = require("../portfolio/portfolio.dao");
 
 const Trades = {}
 Trades.createDocument = async (tradeInfo) => {
+    const binanceStatusList = tradeInfo.binanceStatusList
+    delete tradeInfo.binanceStatusList
+
     const statusList = [{
         ...tradeInfo,
         "price": tradeInfo.candleOpen,
     }]
+
     const newTradeInfo = {
         tradeId: uniqid(),
         ...tradeInfo,
 
         price: tradeInfo.candleOpen,
         statusList,
+        binanceStatusList:binanceStatusList,
         createdDate: new Date()
     }
-    console.log("newTradeInfo ===>", newTradeInfo)
+    console.log("newTradeInfo ===>",  newTradeInfo)
 
     return new Promise((resolve, reject) => {
         const trade = new Trade(newTradeInfo)
@@ -33,10 +38,11 @@ Trades.createDocument = async (tradeInfo) => {
 
 }
 
-Trades.findDocument = async () => await Trade.find({ status: "open" }).exec();
+Trades.findDocument = async (query) => await Trade.find(query).exec();
 
 
-Trades.updateDocument = async (tradeInfo, mfi, sar, candleOpen) => {
+Trades.updateDocument = async (tradeInfo, mfi, sar, candleOpen, closePositionInfo) => {
+    console.log("closePositionInfo in update document ===>", closePositionInfo)
     const { tradeId, position, symbol, portfolio } = tradeInfo
     const status = "close"
     const pnl = utils.getPNL(tradeInfo, candleOpen)
@@ -53,7 +59,7 @@ Trades.updateDocument = async (tradeInfo, mfi, sar, candleOpen) => {
         updatedDate: new Date()
     }
     console.log(tradeId)
-    const res = await Trade.findOneAndUpdate({ tradeId: tradeId }, { $set: { status, pnl, portfolio: newPortfolioAmount }, $push: { statusList: statusInfo } }, { new: true });
+    const res = await Trade.findOneAndUpdate({ tradeId: tradeId }, { $set: { status, pnl, portfolio: newPortfolioAmount }, $push: { statusList: statusInfo, binanceStatusList: closePositionInfo } }, { new: true });
     await Portfolios.updateDocument("MFI_SAR_HEIKINASHI", newPortfolioAmount)
     if (res.status == "close")
         // console.log("updateResp ===>", res)

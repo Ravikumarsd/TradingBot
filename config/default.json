@@ -6,10 +6,19 @@
         "host": "localhost",
         "port": "4000",
         "dbName": "binance-trading",
-        
+        "url": "mongodb://127.0.0.1:27017/binance-trading"
+    },
+    "binance": {
+        "HOST_TEST": "https://testnet.binancefuture.com",
+        "HOST": "https://api.binance.com",
+        "HOST1": "https://api1.binance.com",
+        "HOST2": "https://api2.binance.com",
+        "HOST3": "https://api3.binance.com",
+        "APIKEY": "UGAqj7YByHO8JXKFZLJGUr5fJ5XB5f5VQ29SJlh1Pj6uU1lu05un1C6gQuONxAda",
+        "APISECRET": "77jg0b47C2kfuSsPELcrml2aTRuU0JmjHOwG0JMIrrvgKhFYmo9zHZJTH5hHqJfi"
     },
     "taapi": {
         "HOST_BULK": "https://api.taapi.io/bulk",
-        "SECRET": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6InNpZGRlc2g5NzZAZ21haWwuY29tIiwiaWF0IjoxNjE3MzY5MTA0LCJleHAiOjc5MjQ1NjkxMDR9.v-y2jij-f5eviHQw8vstTWpKDuggeBSbQIyPq_mE8PE"
+        "SECRET": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6InNpZGRlc2g5NzZAZ21haWwuY29tIiwiaWF0IjoxNjIxMjMwNTEyLCJleHAiOjc5Mjg0MzA1MTJ9.xGE3djwPoyR8Kn1kHma8u7yKHXYZu3r2HgB8hqeaZts"
     }
 }

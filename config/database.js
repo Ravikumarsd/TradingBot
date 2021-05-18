@@ -6,12 +6,10 @@ const colors = require('colors');
 //require database URL from properties file
 const config = require('config');
 const dbURL = config.get("dbConfig.url")
-
 const connected = colors.bold.cyan;
 const error = colors.bold.yellow;
 const disconnected = colors.bold.red;
 const termination = colors.bold.magenta;
-
 //export this function and imported by server.js
 module.exports = function () {
 
