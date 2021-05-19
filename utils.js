@@ -1,4 +1,5 @@
 const binance = require("./binance/binance")
+const Configurations = require("./configuration/configuration.dao")
 const Portfolios = require("./portfolio/portfolio.dao")
 
 const utils = {}
@@ -35,9 +36,9 @@ utils.getQTY = async (candleOpen, account, symbol) => {
     const investAmount = (account / 100) * 80
     let qty = investAmount / candleOpen
 
-    // console.log("investAmount ====>>", investAmount, qty)
-    const quantityPrecision = await utils.getQuantityPrecision(symbol)
-    qty = qty.toPrecision(quantityPrecision)
+    console.log("investAmount qty ====>>", investAmount, qty)
+    const quantityPrecision = await utils.getFuturesQuantityPrecision(symbol)
+    qty = qty.toFixed(quantityPrecision)
     return qty
 }
 
@@ -47,13 +48,20 @@ utils.formatSymbolToBinance = (symbol) => {
 
 }
 
-utils.getQuantityPrecision = async (symbol) => {
+utils.getFuturesQuantityPrecision = async (symbol) => {
     symbol = utils.formatSymbolToBinance(symbol)
     const futuresExchangeInfo = await binance.futuresExchangeInfo()
     const quantityPrecision = futuresExchangeInfo.symbols.find((info) => info.pair == symbol).quantityPrecision
-    // console.log("getQuantityPrecision", quantityPrecision)
+    // console.log("getFuturesQuantityPrecision", quantityPrecision)
 
     return quantityPrecision
+}
+
+utils.getSpotQuantityPrecision = async (symbol) => {
+    symbol = utils.formatSymbolToBinance(symbol)
+    const spotExhangeInfo = await binance.exchangeInfo()
+    const quantityPrecision = spotExhangeInfo.symbols.find((info) => info.symbol == symbol)
+    console.log("quantityPrecision", quantityPrecision)
 }
 module.exports = utils
 

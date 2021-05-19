@@ -13,10 +13,12 @@
         "HOST": "https://api.binance.com",
         "HOST1": "https://api1.binance.com",
         "HOST2": "https://api2.binance.com",
-        "HOST3": "https://api3.binance.com"        
+        "HOST3": "https://api3.binance.com"
+
     },
     "taapi": {
         "HOST_BULK": "https://api.taapi.io/bulk"
+        
     }
 
 }

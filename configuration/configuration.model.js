@@ -4,6 +4,7 @@ const configurationSchema = mongoose.Schema({
     leverage: Number,
     pattern:String,
     interval:String,
+    market:String,
     binance: {
         APIKEY: String,
         APISECRET: String,

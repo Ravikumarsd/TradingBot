@@ -4,6 +4,7 @@ const utils = require('../utils');
 const Configurations = require("../configuration/configuration.dao");
 
 const BinanceFutures = {}
+
 BinanceFutures.getBinanceFuturesAccount = async () => {
     const account = await binance.futuresBalance()
     const usdt = account.find((acc) => acc.asset == "USDT").balance

@@ -9,7 +9,9 @@ const app = express();
 const cron = require('node-cron');
 const binance = require("./binance/binance");
 const Configurations = require("./configuration/configuration.dao")
-const colors = require("colors")
+const colors = require("colors");
+const BinanceSpot = require("./binance/binance.spot");
+const utils = require("./utils");
 
 db()
 
@@ -18,8 +20,12 @@ const server = app.listen(port, async () => {
     const conf = await Configurations.findDocument()
 
     startSchedule(conf)
-    
-        
+
+    // BinanceSpot.getBinanceSpotAccount()
+    // const val = await binance.exchangeInfo()
+    // console.log("val ===>",val.symbols[0])
+    // const data = await utils.getSpotQuantityPrecision("MATIC/USDT")
+    // console.log("data ===>",data)
     // const futuresCandles = await binance.futuresCandles("TRXUSDT", "1m")
     // binance.futuresChart( 'BTCUSDT', '1m', sendData );
     // console.info( await binance.futuresGetDataStream() );
