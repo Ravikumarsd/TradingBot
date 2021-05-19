@@ -3,6 +3,7 @@ const configurationSchema = mongoose.Schema({
     symbol: String,
     leverage: Number,
     pattern:String,
+    interval:String,
     binance: {
         APIKEY: String,
         APISECRET: String,

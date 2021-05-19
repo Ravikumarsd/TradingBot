@@ -15,7 +15,7 @@ MFI_SAR_HEIKINASHI.getMultipleIndicators = async (symbol) => {
         "construct": {
             "exchange": "binance",
             "symbol": symbol,
-            "interval": "1m",
+            "interval": conf.interval,
             "indicators": [{ "indicator": "mfi",  }, { "indicator": "sar",  }, { "indicator": "candle",  }]
         }
     }).then(response => {
