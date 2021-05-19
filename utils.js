@@ -29,17 +29,18 @@ utils.getPNL = (tradeInfo, closePrice) => {
 
 }
 
-utils.getQTY = async (candleOpen, account,symbol) => {
-    console.log("account in getQTY ==>> ", account, candleOpen)
+utils.getQTY = async (candleOpen, account, symbol) => {
+    // console.log("account in getQTY ==>> ", account, candleOpen)
     //invest 70% of portfolio
     const investAmount = (account / 100) * 80
     let qty = investAmount / candleOpen
 
-    console.log("investAmount ====>>", investAmount, qty)
+    // console.log("investAmount ====>>", investAmount, qty)
     const quantityPrecision = await utils.getQuantityPrecision(symbol)
     qty = qty.toPrecision(quantityPrecision)
     return qty
 }
+
 utils.formatSymbolToBinance = (symbol) => {
     symbol = symbol.split("/").join("")
     return symbol

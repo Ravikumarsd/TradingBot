@@ -7,18 +7,35 @@ const MFI_SAR_HEIKINASHI = require("./strategies/mfisarheikinashi");
 const port = config.get("app").port
 const app = express();
 const cron = require('node-cron');
-const BinanceFutures = require("./binance/binance.futures");
 const binance = require("./binance/binance");
-const utils = require("./utils");
-const Portfolios = require("./portfolio/portfolio.dao");
-const Trades = require("./trades/trades.dao");
+const Configurations = require("./configuration/configuration.dao")
+const colors = require("colors")
 
 db()
 
 const server = app.listen(port, async () => {
     console.log(`Listening to requests on https://localhost:${port}`);
-    startSchedule()
+    const conf = await Configurations.findDocument()
+
+    startSchedule(conf)
+    
+        
+    // const futuresCandles = await binance.futuresCandles("TRXUSDT", "1m")
+    // binance.futuresChart( 'BTCUSDT', '1m', sendData );
+    // console.info( await binance.futuresGetDataStream() );
+    // console.info( await binance.futuresPositionMarginHistory( "DOTUSDT" ) );
+    // console.info( await binance.promiseRequest( 'v1/time' ) );
+
 });
+function sendData() {
+    const values = arguments[2]
+    // const timeStamp = Date.now()
+    const entries = Object.entries(values)
+
+
+    console.log("values ===>", values)
+
+}
 
 process.on('SIGTERM', () => {
     server.close(() => {
@@ -29,23 +46,28 @@ process.on('SIGTERM', () => {
 
 let cronScheduleHandle = null
 
-const startSchedule = () => {
-    cronScheduleHandle = cron.schedule('*/5 * * * * *', async () => {
-        const symbol = "DOT/USDT"
+const startSchedule = async (conf) => {
+    if (conf.botStatus == "on") {
+        console.log(colors.green.bold("Bot Started"))   
+    } else {
+        console.log(colors.red.bold("Bot Stopped"))
+        return
+    }
+    cronScheduleHandle = cron.schedule(conf.pattern, async () => {
+        const symbol = conf.symbol
         console.log("running node cron...@", Date.now())
         MFI_SAR_HEIKINASHI.getMultipleIndicators(symbol)
         // binance.checkServerTime()
         // console.log("adjustLeverageResp ===>>", adjustLeverageResp)
         // BinanceFutures.getBinanceFuturesAccount()
-
-
-
     });
 }
 
 module.exports = {
     cronScheduleHandle
 }
+
+
 
 
 // {
@@ -134,7 +156,3 @@ module.exports = {
 //         }
 //     ]
 // }
-
-
-
-

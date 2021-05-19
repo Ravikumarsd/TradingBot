@@ -4,17 +4,19 @@ const colors = require('colors');
 const Trades = require("../trades/trades.dao");
 const Portfolios = require("../portfolio/portfolio.dao");
 const BinanceFutures = require("../binance/binance.futures");
+const Configurations = require("../configuration/configuration.dao");
 const { SECRET, HOST_BULK } = config.get("taapi")
 const MFI_SAR_HEIKINASHI = {}
 
-MFI_SAR_HEIKINASHI.getMultipleIndicators = (symbol) => {
+MFI_SAR_HEIKINASHI.getMultipleIndicators = async (symbol) => {
+    const conf = await Configurations.findDocument()
     axios.post(HOST_BULK, {
-        "secret": SECRET,
+        "secret": conf.taapi.SECRET,
         "construct": {
             "exchange": "binance",
             "symbol": symbol,
             "interval": "1m",
-            "indicators": [{ "indicator": "mfi", chart: "heikinashi" }, { "indicator": "sar", chart: "heikinashi" }, { "indicator": "candle", chart: "heikinashi" }]
+            "indicators": [{ "indicator": "mfi",  }, { "indicator": "sar",  }, { "indicator": "candle",  }]
         }
     }).then(response => {
         const indicators = response.data.data
@@ -31,20 +33,20 @@ MFI_SAR_HEIKINASHI.getMultipleIndicators = (symbol) => {
         console.log(colors.yellow("sar:", sar))
         console.log(colors.yellow("candleOpen:", candleOpen))
 
-        MFI_SAR_HEIKINASHI.isPositionOpen().then((openedPosition) => {
-            const { tradeId, status, position } = openedPosition
-            if (openedPosition) {
-                console.log(colors.green.bold(`opened position ===>, tradeId: ${tradeId}, position: ${position}, status: ${status}`))
-                MFI_SAR_HEIKINASHI.closePosition(openedPosition, mfi, sar, candleOpen)
-            } else {
-                if (mfi && sar && candleOpen) {
-                    //check for exit strategy
-                    MFI_SAR_HEIKINASHI.openPosition(symbol, mfi, sar, candleOpen)
-                } else {
-                    console.error(colors.red.bold("error in finding the indicator value"));
-                }
-            }
-        })
+        // MFI_SAR_HEIKINASHI.isPositionOpen().then((openedPosition) => {
+        //     const { tradeId, status, position } = openedPosition
+        //     if (openedPosition) {
+        //         console.log(colors.green.bold(`opened position ===>, tradeId: ${tradeId}, position: ${position}, status: ${status}`))
+        //         MFI_SAR_HEIKINASHI.closePosition(openedPosition, mfi, sar, candleOpen)
+        //     } else {
+        //         if (mfi && sar && candleOpen) {
+        //             //check for exit strategy
+        //             MFI_SAR_HEIKINASHI.openPosition(symbol, mfi, sar, candleOpen)
+        //         } else {
+        //             console.error(colors.red.bold("error in finding the indicator value"));
+        //         }
+        //     }
+        // })
 
     }).catch(error => {
         console.error("error:", error)
@@ -159,8 +161,6 @@ MFI_SAR_HEIKINASHI.openPosition = (symbol, mfi, sar, candleOpen) => {
             console.error(colors.red.bold("No trade singal at this moment"))
         }
     })
-
-
 }
 
 

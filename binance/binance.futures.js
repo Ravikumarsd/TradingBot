@@ -1,6 +1,7 @@
 
 const binance = require("./binance")
 const utils = require('../utils');
+const Configurations = require("../configuration/configuration.dao");
 
 const BinanceFutures = {}
 BinanceFutures.getBinanceFuturesAccount = async () => {
@@ -17,7 +18,9 @@ BinanceFutures.marketBuy = async (symbol, candleOpen) => {
     const qty = await utils.getQTY(candleOpen, account, symbol)
     console.log("marketBuy qty ====>>>", qty)
     const adjustMarginTypeResp = await BinanceFutures.adjustMarginType(symbol)
-    const adjustLeverageResp = await BinanceFutures.adjustLeverage(symbol, 5)
+    const conf = await Configurations.findDocument()
+    const leverage = conf.leverage
+    const adjustLeverageResp = await BinanceFutures.adjustLeverage(symbol, leverage)
     const buyResp = await binance.futuresMarketBuy(symbol, qty)
     return buyResp
     // console.log("buyResp ===>>", buyResp)
@@ -48,7 +51,7 @@ BinanceFutures.adjustMarginType = async (symbol) => {
 }
 
 BinanceFutures.closePositon = async (tradeInfo) => {
-    const {  quantity, side } = tradeInfo
+    const { quantity, side } = tradeInfo
     const symbol = utils.formatSymbolToBinance(tradeInfo.symbol)
 
     const params = {
