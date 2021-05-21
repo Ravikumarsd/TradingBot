@@ -2,10 +2,12 @@
 const binance = require("./binance")
 const utils = require('../utils');
 const Configurations = require("../configuration/configuration.dao");
-
+const Candels = require("../candle/candle.dao");
+const colors = require("colors")
 const BinanceFutures = {}
 
 BinanceFutures.getBinanceFuturesAccount = async () => {
+    console.log("inside futures account")
     const account = await binance.futuresBalance()
     const usdt = account.find((acc) => acc.asset == "USDT").balance
     console.log("usdt in account ===>", usdt)
@@ -162,6 +164,85 @@ BinanceFutures.closePositon = async (tradeInfo) => {
 //     updateTime: 1621265593156
 //   }
 // Binance.futures_create_order(symbol=self.symbol, side='BUY', type='MARKET', quantity=1, reduceOnly='true')
+// time: 1621529700000,
+//     closeTime: 1621529759999,
+//     open: '38978.53',
+//     high: '39329.84',
+//     low: '38953.32',
+//     close: '39319.14',
+//     volume: '953.241',
+//     quoteVolume: '37336657.96042',
+//     takerBuyBaseVolume: '617.687',
+//     takerBuyQuoteVolume: '24202009.12083',
+//     trades: 12759
+
+BinanceFutures.getMFI = async (symbol) => {
+    let candles = await Candels.findDocument()
+    // console.log("candles ==>",candles)
+    symbol = symbol.split("/").join("")
+    const isValidCandleInterval = utils.validCandelIntervals(candles, symbol)
+    if (candles && candles.length == 15 && isValidCandleInterval) {
+        candles = candles.reverse()
+
+        candles = candles.map((candle, i) => {
+            const { high, low, close, volume } = candle;
+            candle.typicalPrice = (Number(high) + Number(low) + Number(close)) / 3;
+            candle.rawMF = candle.typicalPrice.toFixed(4) * volume;
+            candle.rawMF = candle.rawMF.toFixed(4);
+            if (i > 0) {
+                if (candles[i].typicalPrice > candles[i - 1].typicalPrice) {
+                    candle.value = 1;
+                } else {
+                    candle.value = 0;
+                }
+            }
+
+            return candle;
+        });
+
+
+        candles = candles.slice(1);
+
+        let positiveSum = candles
+            .filter((candle) => candle.value == 1)
+            .reduce((acc, cur) => acc + Number(cur.rawMF), 0);
+        // console.log(positiveSum);
+        let negativeSum = candles
+            .filter((candle) => candle.value == 0)
+            .reduce((acc, cur) => acc + Number(cur.rawMF), 0);
+        // console.log(negativeSum);
+        const MFR = positiveSum / negativeSum;
+        const MFI = 100 - 100 / (1 + MFR);
+        const result = {
+            time: candles[candles.length - 1].time,
+            MFI: Number(MFI.toFixed(4))
+        }
+        return result
+    } else {
+        return false
+        // colors.yellow.bold("candles are less than 14 :", candles.length)
+    }
+
+
+    // console.log(MFI);
+
+    // let start = i + 13;
+    // let positiveSum = 0;
+    // let negativeSum = 0;
+
+    // for (let j = start - 13; j <= start; j++) {
+    //     if (candles[j].value == 1) {
+    //         positiveSum += candles.rawMF
+    //         //positive sum
+    //     } else if (candles[j].value == 0) {
+    //         //negative sum
+    //         negativeSum += candles.rawMF
+    //     }
+    // }
+    // const MFR = positiveSum / negativeSum
+    // const MFI = 100 - (100 / (1 + MFR))
+    // candle.mfi = MFI
+}
 
 
 module.exports = BinanceFutures

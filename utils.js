@@ -1,3 +1,4 @@
+const moment = require("moment")
 const binance = require("./binance/binance")
 const Configurations = require("./configuration/configuration.dao")
 const Portfolios = require("./portfolio/portfolio.dao")
@@ -63,6 +64,25 @@ utils.getSpotQuantityPrecision = async (symbol) => {
     const quantityPrecision = spotExhangeInfo.symbols.find((info) => info.symbol == symbol)
     console.log("quantityPrecision", quantityPrecision)
 }
+
+utils.validCandelIntervals = (candles, symbol) => {
+    const diffArray = []
+    symbol = utils.formatSymbolToBinance(symbol)
+    for (let i = 1; i < candles.length; i++) {
+        // console.log(candles[i - 1].time)
+        const diff = moment(candles[i].time).minute() - moment(candles[i - 1].time).minute()
+        // console.log(diff)
+        //revesed array
+        if ((diff == -1 || diff == 59) && candles[i].symbol == symbol) {
+            diffArray.push(true)
+        } else {
+            diffArray.push(false)
+        }
+    }
+    if (diffArray.some((diff) => diff == false)) {
+        return false
+    } else {
+        return true
+    }
+}
 module.exports = utils
-
-

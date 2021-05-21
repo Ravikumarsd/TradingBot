@@ -10,7 +10,7 @@ const Configuration = require("../configuration/configuration.model");
 const { SECRET, HOST_BULK } = config.get("taapi")
 const MFI_SAR_HEIKINASHI = {}
 
-MFI_SAR_HEIKINASHI.getMultipleIndicators = async (symbol) => {
+MFI_SAR_HEIKINASHI.getMultipleIndicators = async (symbol, mfi) => {
     const conf = await Configurations.findDocument()
     axios.post(HOST_BULK, {
         "secret": conf.taapi.SECRET,
@@ -18,11 +18,11 @@ MFI_SAR_HEIKINASHI.getMultipleIndicators = async (symbol) => {
             "exchange": "binance",
             "symbol": symbol,
             "interval": conf.interval,
-            "indicators": [{ "indicator": "mfi", }, { "indicator": "sar", }, { "indicator": "candle", }]
+            "indicators": [{ "indicator": "sar", }, { "indicator": "candle", }]
         }
     }).then(async response => {
         const indicators = response.data.data
-        const mfi = +indicators.find((indicator) => indicator.id.includes("mfi")).result.value.toFixed(8)
+
         const sar = +indicators.find((indicator) => indicator.id.includes("sar")).result.value.toFixed(8)
         const candleOpen = +indicators.find((indicator) => indicator.id.includes("candle")).result.open.toFixed(8)
 
@@ -54,7 +54,7 @@ MFI_SAR_HEIKINASHI.getMultipleIndicators = async (symbol) => {
 
             } else {
                 if (mfi && sar && candleOpen) {
-                    if (conf.market)
+                    if (conf.market == "spot")
                         MFI_SAR_HEIKINASHI.marketBuySpot(symbol, mfi, sar, candleOpen)
                     else
                         MFI_SAR_HEIKINASHI.openPosition(symbol, mfi, sar, candleOpen)
@@ -116,7 +116,8 @@ MFI_SAR_HEIKINASHI.marketSellSpot = async (openedPosition, mfi, sar, candleOpen)
         const closePositionResp = await BinanceSpot.marketSell(openedPosition, mfi, sar, candleOpen)
         console.log("closePositionResp ===>", closePositionResp)
         // const closePositionResp = await BinanceFutures.closePositon(openedPosition)
-        Trades.updateDocument(openedPosition, mfi, sar, candleOpen, closePositionResp)
+        if (closePositionResp)
+            Trades.updateDocument(openedPosition, mfi, sar, candleOpen, closePositionResp)
     } else {
         console.log(colors.blue.bold(`Waiting to close ${tradePostion} position....`))
     }

@@ -5,16 +5,25 @@ const utils = require('../utils');
 
 const BinanceSpot = {}
 
-BinanceSpot.getBinanceSpotAccount = async () => {
+BinanceSpot.getBinanceSpotAccount = async (symbol) => {
+    const currency = symbol.split("/")[0]
+    // console.log("", "getBinanceSpotAccountcurrency", currency)
     const balances = await binance.balance()
-    const usdt = balances.USDT.available
-    console.log("usdt available in spot account ===>>", usdt)
-    return usdt
+    const value = balances[currency].available
+    return value
+
+    // (error, balances) => {
+    //     if (error) return console.error(error);
+    //     // console.info("balances()", balances);
+    //     console.info("BNB balance: ", balances.BNB.available);
+    // });
+
+
 
 }
 
 BinanceSpot.marketBuy = async (symbol, candleOpen) => {
-    const account = await BinanceSpot.getBinanceSpotAccount()
+    const account = await BinanceSpot.getBinanceSpotAccount("USDT/USDT")
     symbol = utils.formatSymbolToBinance(symbol)
     const qty = await utils.getQTY(candleOpen, account, symbol)
     console.log("BinanceSpot marketBuy qty ====>>>", qty)
@@ -24,11 +33,20 @@ BinanceSpot.marketBuy = async (symbol, candleOpen) => {
 }
 
 BinanceSpot.marketSell = async (tradeInfo) => {
-    console.log("BinanceSpot market sell ===>>", tradeInfo)
-    let { symbol, quantity } = tradeInfo
-    symbol = utils.formatSymbolToBinance(symbol)
-    const sellResp = binance.marketSell(symbol, quantity)
-    console.log("BinanceSpot sellResp ===>>", sellResp)
-    return sellResp
+    // console.log("BinanceSpot market sell ===>>", tradeInfo)
+    try {
+        let { symbol } = tradeInfo
+
+        const quantity = await BinanceSpot.getBinanceSpotAccount(symbol)
+        console.log("BinanceSpot market sell ===>>", symbol, quantity)
+        symbol = utils.formatSymbolToBinance(symbol)
+        const sellResp = await binance.marketSell(symbol, quantity)
+        console.log("BinanceSpot sellResp ===>>", sellResp)
+        return sellResp
+    } catch (err) {
+        console.log("BinanceSpot sellResp err ===>>", err.body)
+        return false
+    }
+
 }
 module.exports = BinanceSpot

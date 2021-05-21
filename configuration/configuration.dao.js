@@ -14,7 +14,7 @@ const Configurations = {}
 
 Configurations.findDocument = async () => await Configuration.findOne({}).exec();
 
-// Configurations.updateDocument = async (account, amount) => {
+// Configurations.updateDocument = async (symbol) => {
 //     // console.log("Portfolios.updateDocument ===>", account,amount)
 //     const newPortfolio = await Configuration.findOneAndUpdate({ accountName: account }, { $set: { amount } }, { new: true });
 //     console.log("newPortfolio ===>", newPortfolio)
