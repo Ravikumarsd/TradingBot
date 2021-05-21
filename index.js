@@ -59,9 +59,9 @@ const checkConnection = async (conf) => {
         } else {
             const MFI = await BinanceFutures.getMFI(symbol)
             console.log("MFI ==>", MFI)
-            if (MFI) {
+            
                 MFI_SAR_HEIKINASHI.getMultipleIndicators(symbol, MFI.MFI)
-            }
+            
             // console.log("Connected");
         }
     });

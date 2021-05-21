@@ -18,7 +18,6 @@
     },
     "taapi": {
         "HOST_BULK": "https://api.taapi.io/bulk",
-        
     }
 
 }

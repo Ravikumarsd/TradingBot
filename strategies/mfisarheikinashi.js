@@ -53,10 +53,10 @@ MFI_SAR_HEIKINASHI.getMultipleIndicators = async (symbol, mfi) => {
                 }
 
             } else {
-                if (mfi && sar && candleOpen) {
+                if (sar && candleOpen) {
                     if (conf.market == "spot")
                         MFI_SAR_HEIKINASHI.marketBuySpot(symbol, mfi, sar, candleOpen)
-                    else
+                    else if (mfi && conf.market == "futures")
                         MFI_SAR_HEIKINASHI.openPosition(symbol, mfi, sar, candleOpen)
                 } else {
                     console.error(colors.red.bold("error in finding the indicator value"));
